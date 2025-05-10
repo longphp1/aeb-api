@@ -32,7 +32,7 @@ class Authenticate extends Middleware
     {
         if (empty($guards)) {
             $guards = [null];
-        }                
+        }
 
 
         foreach ($guards as $guard) {

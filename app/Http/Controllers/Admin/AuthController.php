@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exceptions\AccidentException;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Lib\Code;
+use App\Models\SysUser;
+use App\Services\ApiResponseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,20 +19,20 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        $request->validate($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
+        $request->validate([
+            'username' => 'required',
+            'email' => 'required|email|unique:sys_user',
             'password' => 'required|confirmed|min:8',
         ]);
 
-        $user = new User;
-        $user->name = request()->name;
+        $user = new SysUser;
+        $user->username = request()->username;
         $user->email = request()->email;
         $user->password = bcrypt(request()->password);
 
         $user->save();
 
-        return response()->json($user, 201);
+        return ApiResponseService::success($user);
     }
 
     /**
@@ -41,16 +43,18 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'username' => 'required|string',
+            'email' => 'required|string',
             'password' => 'required|string',
             'captchaKey' => 'required|string',
-            'captchaCode' => 'required|string|captcha_api:' . ($request->get('captchaKey') ?? 'captchaKey'),
+            'captchaCode' => 'required|string|captcha:' . ($request->get('captchaKey') ?? 'captchaKey'),
         ]);
-
+        if (!captcha_api_check($request->get('captchaCode') , $request->get('captchaKey'))){
+            return ApiResponseService::errorMessage('Verification code error',Code::USER_VERIFICATION_CODE_ERROR);
+        }
         $credentials = request(['email', 'password']);
 
         if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return ApiResponseService::errorMessage('Unauthorized',Code::USER_PASSWORD_ERROR);
         }
 
         return $this->respondWithToken($token);
@@ -75,7 +79,7 @@ class AuthController extends Controller
     {
         auth()->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return ApiResponseService::success();
     }
 
     /**
@@ -97,10 +101,11 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+        return ApiResponseService::success([
+            'accessToken' => $token,
+            'refreshToken' => $token,
+            'tokenType' => 'Bearer',
+            'expiresIn' => auth()->factory()->getTTL() * 3600
         ]);
     }
 
@@ -113,7 +118,6 @@ class AuthController extends Controller
     {
         try {
             $captcha = app('captcha')->create('default', true);
-
             // 获取图片二进制内容
             $imageContent = (string)$captcha['img']; // 或 $captcha['img']->getEncoded()
             // 转换为 Base64
@@ -121,9 +125,9 @@ class AuthController extends Controller
             $captchaData['captchaBase64'] = $base64Image;
             $captchaData['captchaKey'] = $captcha['key'];
         } catch (\Exception $e) {
-            return eRet(__('验证码生成失败'));
+            return ApiResponseService::error(__('验证码生成失败'));
         }
-        return formatRet(1, 'success', $captchaData);
+        return ApiResponseService::success($captchaData);
     }
 }
 

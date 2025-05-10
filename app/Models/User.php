@@ -3,16 +3,48 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\System\Dept;
+use App\Models\System\Menu;
+use App\Models\System\Role;
+use App\Models\Traits\Basis;
+use App\Models\Traits\HasValidateUnique;
+use App\Models\Traits\LikeScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable  implements JWTSubject
+class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    use Basis,
+        HasValidateUnique,
+        LikeScope;
+
+    protected $table = 'sys_user';
+
+    protected $guarded = [];
+
+    const STATUS_ENABLE = 1;
+
+    const STATUS_DISABLE = 0;
+
+    const SEX_MAN = 1;
+    const SEX_WOMAN = 2;
+    const SEX_UNKNOWN = 0;
+
+    public static $statusList = [
+        self::STATUS_DISABLE => '禁用',
+        self::STATUS_ENABLE => '启用',
+    ];
+
+    public static $sexList = [
+        self::SEX_MAN => '男',
+        self::SEX_WOMAN => '女',
+        self::SEX_UNKNOWN => '保密'
+    ];
     /**
      * The attributes that are mass assignable.
      *
@@ -66,4 +98,47 @@ class User extends Authenticatable  implements JWTSubject
     {
         return [];
     }
+
+    public function roleRelation()
+    {
+        return $this->belongsToMany(Role::class, 'sys_user_role', 'user_id', 'role_id');
+    }
+
+    public function permRelation()
+    {
+        return $this->belongsToMany(Menu::class, 'sys_role_menu', 'role_id', 'menu_id');
+    }
+
+    public function getRolesAttribute()
+    {
+        return $this->roleRelation()->pluck('code')->toArray();
+    }
+
+    public function getRolesIdsAttribute()
+    {
+        return $this->roleRelation()->pluck('id')->toArray();
+    }
+
+    //查询当前用户按钮权限
+    public function getPermsAttribute()
+    {
+        return $this->permRelation()->where('type', Menu::BUTTON_TYPE)->pluck('perm')->toArray();
+    }
+
+    public function dept()
+    {
+        return $this->hasOne(Dept::class, 'id', 'dept_id');
+    }
+
+    public function createdBy()
+    {
+        return $this->hasOne(User::class, 'id', 'created_by');
+    }
+
+    public function updatedBy()
+    {
+        return $this->hasOne(User::class, 'id', 'updated_by');
+    }
+
+
 }

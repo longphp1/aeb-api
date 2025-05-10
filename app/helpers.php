@@ -20,7 +20,7 @@ if (!function_exists('formatRet')) {
             $data = $data->toArray();
         }
         $rt = [
-            'ret' => $code,
+            'code' => $code,
             'msg' => $message,
             'data' => $data,
         ];
@@ -175,5 +175,30 @@ function hmac_sha256_encrypt($message, $secret_key, $hash_key) {
     $hash = hash_hmac('sha256', $message, $hash_key, true);
     $encrypt = base64_encode(hash_hmac('sha256', $hash, $secret_key, true));
     return $encrypt;
+}
+
+if (!function_exists('getIp')) {
+    /**
+     * 获取请求来源ip
+     */
+    function getIp() {
+        $clientIP = request()->ip();
+
+        if (getenv('HTTP_CLIENT_IP')) {
+            $clientIP = getenv('HTTP_CLIENT_IP');
+        } elseif (getenv('HTTP_X_FORWARDED_FOR')) {
+            $clientIP = getenv('HTTP_X_FORWARDED_FOR');
+        } elseif (getenv('HTTP_X_FORWARDED')) {
+            $clientIP = getenv('HTTP_X_FORWARDED');
+        } elseif (getenv('HTTP_FORWARDED_FOR')) {
+            $clientIP = getenv('HTTP_FORWARDED_FOR');
+        } elseif (getenv('HTTP_FORWARDED')) {
+            $clientIP = getenv('HTTP_FORWARDED');
+        } elseif (getenv('REMOTE_ADDR')) {
+            $clientIP = getenv('REMOTE_ADDR');
+        }
+
+        return $clientIP;
+    }
 }
 
