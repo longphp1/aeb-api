@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserInfo  extends JsonResource
@@ -15,7 +16,7 @@ class UserInfo  extends JsonResource
             'nickname' => $this->nickname,
             'gender' => $this->gender,
             'password' => $this->password,
-            'dept_id' => $this->dept_id,
+            'deptId' => $this->dept_id,
             'avatar' => $this->avatar,
             'mobile' => $this->mobile,
             'status' => $this->status,
@@ -24,15 +25,15 @@ class UserInfo  extends JsonResource
             'is_audited' => $this->is_audited,
             'forbid_login' => $this->forbid_login,
             'uuid' => $this->uuid,
-            'created_at' => $this->created_at,
+            'created_at' => $this->created_at!=null?Carbon::parse($this->created_at)->format('Y/m/d H:i'):null,
             'create_by' => $this->create_by,
-            'updated_at' => $this->updated_at,
+            'updated_at' => $this->updated_at!=null?Carbon::parse($this->updated_at)->format('Y/m/d H:i'):null,
             'update_by' => $this->update_by,
             'openid' => $this->openid,
             'company_id' => $this->company_id,
             'roles' => $this->roles??[],
             'perms' => $this->perms??[],
-            'roles_ids' => $this->roles_ids??[],
+            'roleIds' => $this->roles_ids??[],
         ];
     }
 }

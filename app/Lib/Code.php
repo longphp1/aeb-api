@@ -129,6 +129,10 @@ class Code
     const USER_FILE_NOT_AUTHORIZED = ["code" => "A0905", "msg" => "用户文件未授权"];
     const USER_LOCATION_INFORMATION_NOT_AUTHORIZED = ["code" => "A0906", "msg" => "用户位置信息未授权"];
     const USER_CONTACTS_NOT_AUTHORIZED = ["code" => "A0907", "msg" => "用户通讯录未授权"];
+    const USER_ROLE_NAME_ALREADY_EXISTS  = ["code" => "A0908", "msg" => "角色名称已存在"];
+    const USER_ROLE_CODE_ALREADY_EXISTS  = ["code" => "A0909", "msg" => "角色编码已存在"];
+    const CONFIG_KEY_ALREADY_EXISTS  = ["code" => "A0910", "msg" => "系统配置键已存在"];
+    const CONFIG_KEY_NOT_ALREADY_EXISTS  = ["code" => "A0911", "msg" => "系统配置不已存在"];
 
 
 

@@ -29,7 +29,10 @@ class UserNoticeService extends BaseService
     public function getUnReadNotice()
     {
         $this->query->where(['user_id' => auth()->user()->id, 'is_read' => UserNotice::UNREAD]);
-        $data= parent::all();
-        return ['list' => $data,'total'=>count($data)];
+        return parent::index();
+    }
+
+    public function readAll($params){
+        return $this->query->where(['user_id' => auth()->user()->id, 'is_read' => UserNotice::UNREAD])->update(['is_read' => UserNotice::READ]);
     }
 }

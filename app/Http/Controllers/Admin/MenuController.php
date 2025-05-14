@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MenuInfo;
+use App\Lib\Code;
 use App\Services\ApiResponseService;
 use App\Services\System\MenuService;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
-class MenuController  extends Controller
+class MenuController extends Controller
 {
 
     protected $menuService;
@@ -31,18 +33,18 @@ class MenuController  extends Controller
     /**
      * 获取指定菜单
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @param int $id
+     * @return MenuInfo
      */
-    public function show($id): \Illuminate\Http\JsonResponse
+    public function show($id): MenuInfo
     {
-        $menu = $this->menuService->show($id);
-        return ApiResponseService::success($menu);
+        return MenuInfo::make($this->menuService->show($id))->additional(Code::SUCCESS);
     }
+
     /**
      * 创建菜单
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(\Illuminate\Http\Request $request)
@@ -58,14 +60,14 @@ class MenuController  extends Controller
     /**
      * 更新菜单
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(\Illuminate\Http\Request $request, $id)
     {
         // 调用 MenuService 的 updateMenu 方法更新菜单
-        if($this->menuService->updateMenu($id, $request->all())){
+        if ($this->menuService->updateMenu($id, $request->all())) {
             return ApiResponseService::success();
         }
         return ApiResponseService::error();
@@ -74,31 +76,34 @@ class MenuController  extends Controller
     /**
      * 删除菜单
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
         // 调用 MenuService 的 deleteMenu 方法删除菜单
-        if($this->menuService->deleteMenu($id)){
+        if ($this->menuService->deleteMenu($id)) {
             return ApiResponseService::success();
         }
         return ApiResponseService::error();
     }
 
-    public function changeStatus($id, Request $request){
-        if($this->menuService->changeStatus($id, $request->all())){
+    public function changeStatus($id, Request $request)
+    {
+        if ($this->menuService->changeStatus($id, $request->all())) {
             return ApiResponseService::success();
         }
         return ApiResponseService::error();
     }
 
-    public function optionsList(Request $request){
-        $menus = $this->menuService->getOptions();
+    public function optionsList(Request $request)
+    {
+        $menus = $this->menuService->getOptions($request->all());
         return ApiResponseService::success($menus);
     }
 
-    public function routes(Request $request){
+    public function routes(Request $request)
+    {
         $routes = $this->menuService->getRoutesTree();
         return ApiResponseService::success($routes);
     }

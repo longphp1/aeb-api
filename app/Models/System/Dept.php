@@ -47,8 +47,9 @@ class Dept extends Model
         $data = [
             'name' => $params['name'],
             'code' => $params['code'],
-            'parent_id' => $params['parent_id'],
+            'parent_id' => $params['parentId'],
             'sort' => $params['sort'],
+            'status' => $params['status'],
             'create_by' => auth()->user()->id,
             'company_id' => auth()->user()->company_id ?? 0,
             'created_at' => Carbon::now()->toDateTimeString(),

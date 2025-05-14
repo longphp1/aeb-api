@@ -70,6 +70,7 @@ class Kernel extends HttpKernel
         'admin.permission' => \App\Http\Middleware\Permission::class,
         'localize' => \App\Http\Middleware\Localize::class,
         'api_access_log' => \App\Http\Middleware\LogRequestParams::class,
+        'log_api' => \App\Http\Middleware\LogApiRequests::class,
     ];
 
     /**

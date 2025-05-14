@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DictInfo;
+use App\Http\Resources\DictItemInfo;
+use App\Http\Resources\DictList;
+use App\Lib\Code;
 use App\Services\ApiResponseService;
 use App\Services\System\DictService;
 use Illuminate\Http\Request;
@@ -15,47 +19,56 @@ class DictController extends Controller
     {
         $this->dictService = $dictService;
     }
+
     public function index()
     {
-        return $this->dictService->index();
+        return DictList::make($this->dictService->index())->additional(Code::SUCCESS);
     }
 
-    public function show($id,Request $request)
+    public function show($id, Request $request)
     {
-        return $this->dictService->show($id);
+        return DictInfo::make($this->dictService->show($id))->additional(Code::SUCCESS);
     }
 
-    public function store($id,Request $request)
+    public function store(Request $request)
     {
-        if ($this->dictService->store($id,$request->all())){
+        if ($res = $this->dictService->store($request->all())) {
             return ApiResponseService::success();
         }
         return ApiResponseService::error();
     }
 
-    public function update($id,Request $request)
+    public function update($id, Request $request)
     {
-        if ($this->dictService->update($id,$request->all())){
+        if ($this->dictService->update($id, $request->all())) {
             return ApiResponseService::success();
         }
         return ApiResponseService::error();
     }
 
-    public function destroy($id)
+    public function destroy($ids)
     {
-        if ($this->dictService->delete($id)){
+        if ($this->dictService->destroy($ids)) {
             return ApiResponseService::success();
         }
         return ApiResponseService::error();
     }
 
-    public function getDictItems()
+    public function changeStatus($id, Request $request)
     {
-
+        if ($this->dictService->changeStatus($id, $request->all())) {
+            return ApiResponseService::success();
+        }
+        return ApiResponseService::error();
     }
 
-    public function optionsList()
+    public function optionsList(Request $request)
     {
-
+        if ($res = $this->dictService->getList($request->all())) {
+            return ApiResponseService::success($res);
+        }
+        return ApiResponseService::error();
     }
+
+
 }

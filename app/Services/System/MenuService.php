@@ -12,11 +12,9 @@ class MenuService extends BaseService
     protected $model;
 
     protected $filterRules = [
-        'name,route_name' => ['like', 'keyword'],
     ];
 
     protected $orderBy = [
-        'sort' => 'asc',
     ];
 
     public function __construct()
@@ -44,6 +42,12 @@ class MenuService extends BaseService
         if (isset($this->formData['route_name']) && !empty($this->formData['route_name'])) {
             $query->where('route_name', trim($this->formData['route_name']));
         }
+        if (isset($this->formData['keywords'])) {
+            $query->where(function ($query) {
+                $query->where('name', 'like', '%' . $this->formData['keywords'] . '%')
+                    ->orWhere('route_name', 'like', '%' . $this->formData['keywords'] . '%');
+            });
+        }
     }
 
     public function show($id)
@@ -60,7 +64,7 @@ class MenuService extends BaseService
     public function list()
     {
         $this->getFilter($this->query);
-        $this->query->with(['children'])->where('type', Menu::CATALOG_TYPE)->orderBy($this->orderBy[0], $this->orderBy[1]);
+        $this->query->with(['children'])->where('type', Menu::CATALOG_TYPE);
         $menusList = parent::index();
         return $this->buildTree($menusList);
     }
@@ -124,7 +128,7 @@ class MenuService extends BaseService
      */
     public function deleteMenu($id)
     {
-        $ids = Arr::wrap($id);
+        $ids = _id($id);
         return $this->model->whereIn($ids)->delete();
     }
 
@@ -157,14 +161,14 @@ class MenuService extends BaseService
         return false;
     }
 
-    public function getOptions()
+    public function getOptions($params)
     {
         $this->query->with(['children'])->where('type', Menu::CATALOG_TYPE)->orderBy('sort', 'asc');
         $menusList = parent::all();
-        return $this->treeOption($menusList);
+        return $this->treeOption($menusList, $params['onlyParent']??false);
     }
 
-    public function treeOption($menusList)
+    public function treeOption($menusList, $onlyParent = false)
     {
         $tree = [];
         foreach ($menusList as $menu) {
@@ -179,15 +183,16 @@ class MenuService extends BaseService
                     'label' => $child->name,
                     'children' => [],
                 ];
-                $childList = Menu::query()->where('parent_id', $child->id)->get();
-                foreach ($childList as $tmp) {
-                    $thirdTmp = [
-                        'value' => $tmp->id,
-                        'label' => $tmp->name,
-                        'children' => [],
-                    ];
-                    $secondTmp['children'][] = $thirdTmp;
-
+                if (!$onlyParent) {
+                    $childList = Menu::query()->where('parent_id', $child->id)->get();
+                    foreach ($childList as $tmp) {
+                        $thirdTmp = [
+                            'value' => $tmp->id,
+                            'label' => $tmp->name,
+                            'children' => [],
+                        ];
+                        $secondTmp['children'][] = $thirdTmp;
+                    }
                 }
                 $firstTmp['children'][] = $secondTmp;
             }
@@ -196,15 +201,17 @@ class MenuService extends BaseService
         return $tree;
     }
 
-    public function getRoutesTree(){
+    public function getRoutesTree()
+    {
         $this->query->with(['children'])->where('type', Menu::CATALOG_TYPE)->orderBy('sort', 'asc');
         $menusList = parent::all();
         return $this->getRoutesTreeMenu($menusList);
     }
 
-    public function getRoutesTreeMenu($menusList){
+    public function getRoutesTreeMenu($menusList)
+    {
         $tree = [];
-        foreach ($menusList as $menu){
+        foreach ($menusList as $menu) {
             $firstMenu = [
                 'name' => $menu->route_path,
                 'path' => $menu->route_path,
@@ -213,12 +220,12 @@ class MenuService extends BaseService
                 'meta' => [
                     'title' => $menu->name,
                     'icon' => $menu->icon,
-                    'alwaysShow' => $menu->always_show==1?true:false,
-                    'hidden' => $menu->visible==1?false:true,
+                    'alwaysShow' => $menu->always_show == 1 ? true : false,
+                    'hidden' => $menu->visible == 1 ? false : true,
                 ],
                 'children' => [],
             ];
-            foreach ($menu->children as $child){
+            foreach ($menu->children as $child) {
                 $secondMenu = [
                     'name' => $child->name,
                     'path' => $child->route_path,
@@ -228,25 +235,25 @@ class MenuService extends BaseService
                         'title' => $child->name,
                         'path' => $child->route_path,
                         'icon' => $child->icon,
-                        'alwaysShow' => $child->always_show==1?true:false,
-                        'hidden' => $child->visible==1?false:true,
+                        'alwaysShow' => $child->always_show == 1 ? true : false,
+                        'hidden' => $child->visible == 1 ? false : true,
                         'params' => $child->params
                     ],
                     'children' => [],
                 ];
-                $childList = Menu::query()->where('parent_id', $child->id)->where('type',Menu::MENU_TYPE)->get();
-                foreach ($childList as $tmp){
+                $childList = Menu::query()->where('parent_id', $child->id)->where('type', Menu::MENU_TYPE)->get();
+                foreach ($childList as $tmp) {
                     $thirdMenu = [
                         'name' => $tmp->name,
                         'path' => $tmp->route_path,
-                       'redirect' => $tmp->redirect,
+                        'redirect' => $tmp->redirect,
                         'component' => $tmp->component,
-                       'meta' => [
+                        'meta' => [
                             'title' => $tmp->name,
                             'path' => $child->route_path,
                             'icon' => $tmp->icon,
-                            'alwaysShow' => $tmp->always_show==1?true:false,
-                            'hidden' => $tmp->visible==1?false:true,
+                            'alwaysShow' => $tmp->always_show == 1 ? true : false,
+                            'hidden' => $tmp->visible == 1 ? false : true,
                         ],
                         'children' => [],
                     ];
@@ -262,21 +269,20 @@ class MenuService extends BaseService
     public function rules()
     {
         return [
-            'parent_id' => 'required|integer',
-            'tree_path' => 'required|string',
+            'parentId' => 'required|integer',
             'name' => 'required|string',
             'type' => 'required|integer|in:1,2,3,4',
-            'route_name' => 'required|string',
-            'route_path' => 'required|string',
-            'component' => 'sometimes|string',
-            'perm' => 'sometimes|string',
-            'always_show' => 'sometimes|integer|in:0,1',
-            'keep_alive' => 'sometimes|integer|in:0,1',
-            'visible' => 'sometimes|integer|in:0,1',
-            'sort' => 'required|integer',
-            'icon' => 'required|string',
-            'redirect' => 'sometimes|string',
-            'params' => 'sometimes|string',
+            'routeName' => 'sometimes|nullable|string',
+            'routePath' => 'sometimes|nullable|string',
+            'component' => 'sometimes|nullable|string',
+            'perm' => 'sometimes|nullable|string',
+            'alwaysShow' => 'sometimes|nullable|integer|in:0,1',
+            'keepAlive' => 'sometimes|nullable|integer|in:0,1',
+            'visible' => 'sometimes|nullable|integer|in:0,1',
+            'sort' => 'sometimes|nullable|integer',
+            'icon' => 'sometimes|nullable|string',
+            'redirect' => 'sometimes|nullable|string',
+            'params' => 'sometimes|nullable|array',
         ];
     }
 

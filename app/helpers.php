@@ -6,12 +6,12 @@ use Carbon\Carbon;
 if (!function_exists('formatRet')) {
     /**
      * @param $code
-     * @param  string  $message
-     * @param  array  $data
-     * @param  int  $status
-     * @param  array  $replace
-     * @param  array  $headers
-     * @param  int  $options
+     * @param string $message
+     * @param array $data
+     * @param int $status
+     * @param array $replace
+     * @param array $headers
+     * @param int $options
      * @return \Illuminate\Http\JsonResponse
      */
     function formatRet($code, $message = '', $data = [], $status = 200, array $replace = [], array $headers = [], $options = 0)
@@ -36,9 +36,9 @@ if (!function_exists('formatRet')) {
 if (!function_exists('eRet')) {
     /**
      * 意外的报错返回
-     * @param  string  $message
-     * @param  int  $status
-     * @param  array  $data
+     * @param string $message
+     * @param int $status
+     * @param array $data
      * @return \Illuminate\Http\JsonResponse
      * @throws AccidentException
      */
@@ -115,7 +115,7 @@ if (!function_exists('isEn')) {
 }
 
 
-if (! function_exists('admin_path')) {
+if (!function_exists('admin_path')) {
     function admin_path(string $path = '')
     {
         $path = ltrim($path, '/');
@@ -124,7 +124,7 @@ if (! function_exists('admin_path')) {
     }
 }
 
-if (! function_exists('remove_special_char')) {
+if (!function_exists('remove_special_char')) {
     /**
      *
      * @param string $str
@@ -132,7 +132,7 @@ if (! function_exists('remove_special_char')) {
      */
     function remove_special_char(string $str)
     {
-        return str_replace(['/','\\',':','*','"','<','>','|','?', ' ', '#', '%'],'_',$str);
+        return str_replace(['/', '\\', ':', '*', '"', '<', '>', '|', '?', ' ', '#', '%'], '_', $str);
     }
 }
 
@@ -141,16 +141,16 @@ if (! function_exists('remove_special_char')) {
  * @param string $str
  * @return integer
  */
-if (! function_exists('trim_all')) {
+if (!function_exists('trim_all')) {
     function trim_all($str)//删除空格
     {
-        $qian=array(" ","　","\t","\n","\r");
-        $hou=array("","","","","");
-        return str_replace($qian,$hou,$str);
+        $qian = array(" ", "　", "\t", "\n", "\r");
+        $hou = array("", "", "", "", "");
+        return str_replace($qian, $hou, $str);
     }
 }
 
-if (! function_exists('getTmpDir')) {
+if (!function_exists('getTmpDir')) {
     function getTmpDir(): string
     {
         $tmp = ini_get('upload_tmp_dir');
@@ -166,12 +166,14 @@ if (! function_exists('getTmpDir')) {
 /**
  * 获得毫秒
  * */
-function getMillisecond() {
-    list($microsecond , $time) = explode(' ', microtime()); //' '中间是一个空格
-    return (float)sprintf('%.0f',(floatval($microsecond)+floatval($time))*1000);
+function getMillisecond()
+{
+    list($microsecond, $time) = explode(' ', microtime()); //' '中间是一个空格
+    return (float)sprintf('%.0f', (floatval($microsecond) + floatval($time)) * 1000);
 }
 
-function hmac_sha256_encrypt($message, $secret_key, $hash_key) {
+function hmac_sha256_encrypt($message, $secret_key, $hash_key)
+{
     $hash = hash_hmac('sha256', $message, $hash_key, true);
     $encrypt = base64_encode(hash_hmac('sha256', $hash, $secret_key, true));
     return $encrypt;
@@ -181,7 +183,8 @@ if (!function_exists('getIp')) {
     /**
      * 获取请求来源ip
      */
-    function getIp() {
+    function getIp()
+    {
         $clientIP = request()->ip();
 
         if (getenv('HTTP_CLIENT_IP')) {
@@ -201,4 +204,18 @@ if (!function_exists('getIp')) {
         return $clientIP;
     }
 }
-
+if (!function_exists('_id')) {
+    /**
+     * 获取请求来源ip
+     */
+    function _id($id)
+    {
+        if (is_string($id) && strpos($id, ',') !== false) {
+            return explode(',', $id);
+        } else if (is_array($id)) {
+            return $id;
+        } else {
+            return [$id];
+        }
+    }
+}

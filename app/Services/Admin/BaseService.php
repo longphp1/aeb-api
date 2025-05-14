@@ -158,16 +158,17 @@ class BaseService
      * @param array $id
      * @return bool
      */
-    public function delete(array $id): bool
+    public function delete($id): bool
     {
-        return $this->model::whereIn('id', $id)->delete();
+        $ids = Arr::wrap($id);
+        return $this->model::whereIn('id', $ids)->delete();
     }
 
     /**
      * 获取某个字段数据
      *
-     * @param  string  $column
-     * @param  int  $limit
+     * @param string $column
+     * @param int $limit
      * @return Collection
      */
     public function getColumnData(string $column, int $limit = 5)

@@ -15,11 +15,13 @@ class UserNotice extends Model
     const READ = 1;
     const UNREAD = 0;
 
-    public function notice(){
-        return $this->belongsTo(Notice::class,'notice_id','id');
+    public function notice()
+    {
+        return $this->hasOne(Notice::class, 'id', 'notice_id');
     }
 
-    public function user(){
-        return $this->hasOne(SysUser::class,'user_id','id');
+    public function user()
+    {
+        return $this->hasOne(SysUser::class, 'user_id', 'id');
     }
 }

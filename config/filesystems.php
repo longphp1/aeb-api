@@ -59,6 +59,11 @@ return [
             'throw' => false,
             'report' => false,
         ],
+        'tmp' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/tmp'),
+            'visibility' => 'private',
+        ],
 
     ],
 

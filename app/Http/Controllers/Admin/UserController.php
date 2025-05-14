@@ -9,6 +9,7 @@ use App\Lib\Code;
 use App\Services\Admin\UserService;
 use App\Services\ApiResponseService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -34,7 +35,10 @@ class UserController extends Controller
     {
         try {
             $user = $this->userService->store($request->all());
-            return ApiResponseService::success($user);
+            if ($user == Code::SUCCESS) {
+                return ApiResponseService::success($user);
+            }
+            return ApiResponseService::error($user);
         } catch (\Exception $e) {
             return ApiResponseService::errorMessage($e->getMessage());
         }
@@ -51,11 +55,14 @@ class UserController extends Controller
     /**
      * 更新用户信息
      */
-    public function update(Request $request, $id)
+    public function update($id, Request $request)
     {
         try {
-            $user = $this->userService->update($id);
-            return ApiResponseService::success($user);
+            $user = $this->userService->update($id, $request->all());
+            if ($user == Code::SUCCESS) {
+                return ApiResponseService::success($user);
+            }
+            return ApiResponseService::error($user);
         } catch (\Exception $e) {
             return ApiResponseService::errorMessage($e->getMessage());
         }
@@ -67,7 +74,7 @@ class UserController extends Controller
     public function destroy($id)
     {
         try {
-            $this->userService->delete($id);
+            $this->userService->destroy($id);
             return ApiResponseService::success();
         } catch (\Exception $e) {
             return ApiResponseService::errorMessage($e->getMessage());
@@ -109,5 +116,63 @@ class UserController extends Controller
     public function me()
     {
         return UserInfo::make(auth()->user())->additional(Code::SUCCESS);
+    }
+
+    /**
+     * 导出用户信息
+     */
+    public function export(Request $request)
+    {
+        return $this->userService->export($request->all());
+    }
+
+    public function template(Request $request)
+    {
+        $file = Storage::disk('tmp')->get("userImportTemplate.xlsx");
+        return response()->streamDownload(function () use ($file) {
+            echo $file;
+        }, "userImportTemplate");
+    }
+
+    public function import(Request $request)
+    {
+        if ($res = $this->userService->import($request->all())) {
+            return ApiResponseService::success($res);
+        }
+        return ApiResponseService::errorMessage("导入失败");
+    }
+
+    public function resetPassword($id, Request $request)
+    {
+        return ApiResponseService::success($this->userService->resetPassword($id, $request->all()));
+    }
+
+    public function changeStatus($id, Request $request)
+    {
+        if ($res = $this->userService->changeStatus($id, $request->all())) {
+            return ApiResponseService::success($res);
+        }
+        return ApiResponseService::errorMessage("修改失败");
+    }
+
+    public function updateProfile(Request $request)
+    {
+        if ($res = $this->userService->updateProfile($request->all())) {
+            return ApiResponseService::success($res);
+        }
+        return ApiResponseService::errorMessage("修改失败");
+    }
+
+    public function updatePassword(Request $request)
+    {
+        if ($res = $this->userService->updatePassword($request->all())) {
+            return ApiResponseService::success($res);
+        }
+        return ApiResponseService::errorMessage("修改失败");
+    }
+
+    public function optionsList(Request $request)
+    {
+        return ApiResponseService::success($this->userService->optionsList($request->all()));
     }
 }

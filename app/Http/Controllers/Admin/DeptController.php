@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\ApiResponseService;
 use App\Services\System\DeptService;
+use Illuminate\Http\Request;
 
 class DeptController extends Controller
 {
@@ -26,17 +27,17 @@ class DeptController extends Controller
         return ApiResponseService::success($this->deptService->show($id));
     }
 
-    public function store()
+    public function store(Request $request)
     {
-        if ($this->deptService->store()){
+        if ($this->deptService->store($request->all())){
             return ApiResponseService::success();
         }
         return ApiResponseService::error();
     }
 
-    public function update($id)
+    public function update($id,Request $request)
     {
-        if ($this->deptService->update($id)){
+        if ($this->deptService->update($id,$request->all())){
             return ApiResponseService::success();
         }
         return ApiResponseService::error();

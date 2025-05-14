@@ -12,7 +12,6 @@ class DeptService extends BaseService
     protected $model;
 
     protected $filterRules = [
-        'name' => ['like', 'keyword'],
     ];
 
     protected $orderBy = [
@@ -29,19 +28,28 @@ class DeptService extends BaseService
 
     public function getFilter(&$query)
     {
-        if (isset($this->formData['parent_id'])) {
-            $query->where('parent_id', $this->formData['parent_id']);
+        if (isset($this->formData['parentId'])) {
+            $query->where('parent_id', $this->formData['parentId']);
         }
         if (isset($this->formData['code'])) {
             $query->where('code', $this->formData['code']);
+        }
+        if (isset($this->formData['status'])) {
+            $query->where('status', $this->formData['status']);
+        }
+        if (isset($this->formData['keywords'])) {
+            $query->where(function ($query) {
+                $query->where('code', 'like', '%' . $this->formData['keywords'] . '%')
+                    ->orWhere('name', 'like', '%' . $this->formData['keywords'] . '%');
+            });
         }
     }
 
     public function getList()
     {
         $this->getFilter($this->query);
-        $this->query->with(['children']);
-        return parent::index();
+        $this->query->with(['children'])->where('parent_id',0);
+        return parent::all();
     }
 
 
@@ -50,10 +58,10 @@ class DeptService extends BaseService
         return $this->model::findOrFail($id);
     }
 
-    public function store()
+    public function store($params)
     {
-        validator($this->formData, $this->rules())->validate();
-        $data = $this->model->init($this->formData);
+        validator($params, $this->rules())->validate();
+        $data = $this->model->init($params);
         $parentIdArr = $this->getAncestorIds($data['parent_id']);
         $data['tree_path'] = implode(',', $parentIdArr);
         return $this->query->create($data);
@@ -75,12 +83,12 @@ class DeptService extends BaseService
         return array_reverse($ids); // 按层级顺序返回 [上级, 上上级...]
     }
 
-    public function update($id)
+    public function update($id,$params)
     {
-        validator($this->formData, $this->rules())->validate();
+        validator($params, $this->rules())->validate();
         $dept = $this->model->find($id);
         if ($dept) {
-            $data = $this->model->init($this->formData, 'update');
+            $data = $this->model->init($params, 'update');
             $parentIdArr = $this->getAncestorIds($data['parent_id']);
             $data['tree_path'] = implode(',', $parentIdArr);
             return $dept->update($data);
@@ -90,14 +98,14 @@ class DeptService extends BaseService
 
     public function destroy($id)
     {
-        $ids = Arr::wrap($id);
+        $ids = _id($id);
         return $this->model->whereIn($ids)->delete();
     }
 
     public function options()
     {
         $this->getFilter($this->query);
-        $this->query->with(['children']);
+        $this->query->with(['children'])->where('parent_id',0);
         $deptList = parent::all();
         return $this->treeOptions($deptList);
     }

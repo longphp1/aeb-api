@@ -28,26 +28,25 @@ class Menu extends Model
         return $this->hasMany(self::class, 'parent_id');
     }
 
-    public  function init($params, $type = 'add')
+    public function init($params, $type = 'add')
     {
         $data = [
-            'parent_id' => $params['parent_id'],
-            'tree_path' => $params['tree_path'] ?? '',
+            'parent_id' => $params['parentId'],
             'name' => $params['name'] ?? '',
             'type' => $params['type'] ?? '',
-            'route_name' => $params['route_name'] ?? '',
-            'route_path' => $params['route_path'] ?? '',
+            'route_name' => $params['routeName'] ?? '',
+            'route_path' => $params['routePath'] ?? '',
             'component' => $params['component'] ?? '',
-            'perm' => $params['perm'],
-            'always_show' => $params['always_show'] ?? '',
-            'keep_alive' => $params['keep_alive'] ?? '',
-            'visible' => $params['visible'] ?? '',
-            'sort' => $params['sort'] ?? '',
+            'perm' => $params['perm']??'',
+            'always_show' => $params['alwaysShow'] ?? 0,
+            'keep_alive' => $params['keepAlive'] ?? 0,
+            'visible' => $params['visible'] ?? 1,
+            'sort' => $params['sort'] ?? 1,
             'icon' => $params['icon'] ?? '',
             'redirect' => $params['redirect'] ?? '',
-            'params' => $params['params'] ?? '',
+            'params' => isset($params['params']) ? json_encode($params['params']) : '',
             'created_at' => Carbon::now()->toDateTimeString(),
-            'company_id' => auth()->user()->company_id ?? '',
+            'company_id' => auth()->user()->company_id ??0,
         ];
         if ($type == 'update') {
             $data['updated_at'] = Carbon::now()->toDateTimeString();

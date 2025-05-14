@@ -48,13 +48,13 @@ class AuthController extends Controller
             'captchaKey' => 'required|string',
             'captchaCode' => 'required|string|captcha:' . ($request->get('captchaKey') ?? 'captchaKey'),
         ]);
-        if (!captcha_api_check($request->get('captchaCode') , $request->get('captchaKey'))){
-            return ApiResponseService::errorMessage('Verification code error',Code::USER_VERIFICATION_CODE_ERROR);
+        if (!captcha_api_check($request->get('captchaCode'), $request->get('captchaKey'))) {
+            return ApiResponseService::errorMessage('Verification code error', Code::USER_VERIFICATION_CODE_ERROR);
         }
         $credentials = request(['email', 'password']);
 
         if (!$token = auth()->attempt($credentials)) {
-            return ApiResponseService::errorMessage('Unauthorized',Code::USER_PASSWORD_ERROR);
+            return ApiResponseService::errorMessage('Unauthorized', Code::USER_PASSWORD_ERROR);
         }
 
         return $this->respondWithToken($token);
@@ -118,11 +118,8 @@ class AuthController extends Controller
     {
         try {
             $captcha = app('captcha')->create('default', true);
-            // 获取图片二进制内容
-            $imageContent = (string)$captcha['img']; // 或 $captcha['img']->getEncoded()
-            // 转换为 Base64
-            $base64Image = 'data:image/jpeg;base64,' . base64_encode($imageContent);
-            $captchaData['captchaBase64'] = $base64Image;
+            $captchaData['sensitive'] = $captcha['sensitive'];
+            $captchaData['captchaBase64'] = $captcha['img'];
             $captchaData['captchaKey'] = $captcha['key'];
         } catch (\Exception $e) {
             return ApiResponseService::error(__('验证码生成失败'));

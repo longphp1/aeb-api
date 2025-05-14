@@ -12,6 +12,9 @@ class Dict extends Model
 
     protected $guarded = [];
 
+    const STATUS_ENABLE = 1;
+    const STATUS_DISABLE = 0;
+
     public function items()
     {
         return $this->hasMany(DictItem::class, 'dict_code', 'dict_code');
@@ -20,15 +23,16 @@ class Dict extends Model
     public function init($params, $type = 'add')
     {
         $data = [
-            'dict_code' => $params['dict_code'],
+            'dict_code' => $params['dictCode'],
             'name' => $params['name'],
             'status' => $params['status'],
             'remark' => $params['remark'],
-            'create_by' => auth()->user()->id,
             'company_id' => auth()->user()->company_id ?? 0,
-            'created_at' => Carbon::now()->toDateTimeString(),
         ];
-        if ($type == 'update') {
+        if ($type == 'add') {
+            $data['create_by'] = auth()->user()->id;
+            $data['created_at'] = Carbon::now()->toDateTimeString();
+        } else {
             $data['update_by'] = auth()->user()->id;
             $data['updated_at'] = Carbon::now()->toDateTimeString();
         }

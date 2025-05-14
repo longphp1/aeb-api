@@ -12,6 +12,8 @@ use App\Models\Traits\LikeScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
@@ -44,16 +46,6 @@ class User extends Authenticatable implements JWTSubject
         self::SEX_MAN => '男',
         self::SEX_WOMAN => '女',
         self::SEX_UNKNOWN => '保密'
-    ];
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
     ];
 
     /**
@@ -138,6 +130,31 @@ class User extends Authenticatable implements JWTSubject
     public function updatedBy()
     {
         return $this->hasOne(User::class, 'id', 'updated_by');
+    }
+
+    public static function init($params, $type = 'add')
+    {
+        $data = [
+            'username' => $params['username'],
+            'nickname' => $params['nickname'],
+            'gender' => $params['gender'],
+            'dept_id' => $params['deptId'],
+            'avatar' => $params['avatar']??'',
+            'mobile' => $params['mobile'],
+            'email' => $params['email'],
+            'status' => $params['status']??1,
+            'forbid_login' => $params['forbid_login'] ?? 0
+        ];
+        if ($type == 'add') {
+            $data['created_at'] = Carbon::now()->toDateTimeString();
+            $data['uuid'] = Str::uuid()->toString();
+            $data['create_by'] = auth()->user()->id;
+            $data['company_id'] = auth()->user()->company_id;
+        } else {
+            $data['updated_at'] = Carbon::now()->toDateTimeString();
+            $data['update_by'] = auth()->user()->id;
+        }
+        return $data;
     }
 
 

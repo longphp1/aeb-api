@@ -22,14 +22,15 @@ class Role extends Model
             'code' => $params['code'] ?? '',
             'sort' => $params['sort'] ?? '',
             'status' => $params['status'] ?? '',
-            'data_scope' => $params['data_scope'] ?? '',
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'create_by' => auth()->user()->id ?? '',
-            'company_id' => auth()->user()->company_id ?? '',
+            'data_scope' => $params['dataScope'] ?? 0,
         ];
-        if ($type == 'update') {
+        if ($type == 'add') {
+            $data['created_at'] = Carbon::now()->toDateTimeString();
+            $data['create_by'] = auth()->user()->id ?? 0;
+            $data['company_id'] = auth()->user()->company_id ?? 0;
+        } else {
             $data['updated_at'] = Carbon::now()->toDateTimeString();
-            $data['update_by'] = auth()->user()->id ?? '';
+            $data['update_by'] = auth()->user()->id ?? 0;
         }
         return $data;
     }
