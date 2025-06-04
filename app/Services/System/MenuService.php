@@ -129,7 +129,7 @@ class MenuService extends BaseService
     public function deleteMenu($id)
     {
         $ids = _id($id);
-        return $this->model->whereIn($ids)->delete();
+        return $this->query->whereIn('id',$ids)->delete();
     }
 
     /**
@@ -213,12 +213,14 @@ class MenuService extends BaseService
         $tree = [];
         foreach ($menusList as $menu) {
             $firstMenu = [
-                'name' => $menu->route_path,
+                'name' => $menu->name,
+                'name_en' => $menu->name_en,
                 'path' => $menu->route_path,
                 'redirect' => $menu->redirect,
                 'component' => $menu->component,
                 'meta' => [
                     'title' => $menu->name,
+                    'title_en' => $menu->name_en,
                     'icon' => $menu->icon,
                     'alwaysShow' => $menu->always_show == 1 ? true : false,
                     'hidden' => $menu->visible == 1 ? false : true,
@@ -228,11 +230,13 @@ class MenuService extends BaseService
             foreach ($menu->children as $child) {
                 $secondMenu = [
                     'name' => $child->name,
+                    'name_en' => $child->name_en,
                     'path' => $child->route_path,
                     'redirect' => $child->redirect,
                     'component' => $child->component,
                     'meta' => [
                         'title' => $child->name,
+                        'title_en' => $child->name_en,
                         'path' => $child->route_path,
                         'icon' => $child->icon,
                         'alwaysShow' => $child->always_show == 1 ? true : false,
@@ -245,11 +249,13 @@ class MenuService extends BaseService
                 foreach ($childList as $tmp) {
                     $thirdMenu = [
                         'name' => $tmp->name,
+                        'name_en' => $tmp->name_en,
                         'path' => $tmp->route_path,
                         'redirect' => $tmp->redirect,
                         'component' => $tmp->component,
                         'meta' => [
                             'title' => $tmp->name,
+                            'title_en' => $tmp->name_en,
                             'path' => $child->route_path,
                             'icon' => $tmp->icon,
                             'alwaysShow' => $tmp->always_show == 1 ? true : false,

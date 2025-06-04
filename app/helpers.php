@@ -205,9 +205,6 @@ if (!function_exists('getIp')) {
     }
 }
 if (!function_exists('_id')) {
-    /**
-     * 获取请求来源ip
-     */
     function _id($id)
     {
         if (is_string($id) && strpos($id, ',') !== false) {
