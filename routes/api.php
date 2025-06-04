@@ -11,7 +11,7 @@ Route::group([
     Route::post('/register', [AuthController::class, 'register'])->name('register');
     Route::get('/captcha', [AuthController::class, 'getCaptcha'])->name('captcha');
     Route::post('/login', [AuthController::class, 'login'])->name('login');
-    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api')->name('logout');
+    Route::delete('/logout', [AuthController::class, 'logout'])->middleware('auth:api')->name('logout');
     Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api')->name('refresh');
 });
 

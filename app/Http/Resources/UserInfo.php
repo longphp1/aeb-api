@@ -10,6 +10,7 @@ class UserInfo  extends JsonResource
 
     public function toArray($request)
     {
+
         return [
             'id' => $this->id,
             'username' => $this->username,
@@ -17,6 +18,7 @@ class UserInfo  extends JsonResource
             'gender' => $this->gender,
             'password' => $this->password,
             'deptId' => $this->dept_id,
+            'deptName' => $this->dept->name??'',
             'avatar' => $this->avatar,
             'mobile' => $this->mobile,
             'status' => $this->status,
@@ -25,9 +27,9 @@ class UserInfo  extends JsonResource
             'is_audited' => $this->is_audited,
             'forbid_login' => $this->forbid_login,
             'uuid' => $this->uuid,
-            'created_at' => $this->created_at!=null?Carbon::parse($this->created_at)->format('Y/m/d H:i'):null,
+            'createTime' => $this->created_at!=null?Carbon::parse($this->created_at)->format('Y/m/d H:i'):null,
             'create_by' => $this->create_by,
-            'updated_at' => $this->updated_at!=null?Carbon::parse($this->updated_at)->format('Y/m/d H:i'):null,
+            'updateTime' => $this->updated_at!=null?Carbon::parse($this->updated_at)->format('Y/m/d H:i'):null,
             'update_by' => $this->update_by,
             'openid' => $this->openid,
             'company_id' => $this->company_id,

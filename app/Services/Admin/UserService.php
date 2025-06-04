@@ -65,10 +65,10 @@ class UserService extends BaseService
             'openId' => 'sometimes|nullable|string',
         ])->validate();
         $code = $this->checkUserName($params);
-        if ($code!= Code::SUCCESS) {
+        if ($code != Code::SUCCESS) {
             return $code;
         }
-        $data = $this->model::init($this->formData,'add');
+        $data = $this->model::init($this->formData, 'add');
         DB::transaction(function () use ($data, $params) {
             $user = $this->query->create($data);
             $userRoleList = [];
@@ -102,38 +102,63 @@ class UserService extends BaseService
             'avatar' => 'sometimes|nullable|string',
             'openId' => 'sometimes|nullable|string',
         ])->validate();
-        /*$code = $this->checkUserName($params);
-        if ($code!= Code::SUCCESS) {
+        $code = $this->checkUserName($params, 'update');
+        if ($code != Code::SUCCESS) {
             return $code;
-        }*/
-        $user = $this->query->findOrFail($id);
-        if ($user) {
-            DB::transaction(function () use ($user, $id, $params) {
-                $updateData = $this->model::init($params,'update');
-                $this->query->where('id',$id)->update($updateData);
-                UserRole::where('user_id', $id)->delete();
-                $userRoleList = [];
-                foreach ($params['roleIds'] as $roleId) {
-                    $userRoleList[] = [
-                        'user_id' => $id,
-                        'role_id' => $roleId,
-                        'company_id' => auth()->user()->company_id ?? 0
-                    ];
-                }
-                if (!empty($userRoleList)) {
-                    UserRole::insert($userRoleList);
-                }
-            });
-            return Code::SUCCESS;
         }
-        return Code::USER_NOT_EXIST;
+        $user = $this->model->newQuery()->findOrFail($id);
+        if (!$user) {
+            return Code::USER_NOT_EXIST;
+        }
+        DB::transaction(function () use ($user, $id, $params) {
+            $updateData = $this->model::init($params, 'update');
+            $user->update($updateData);
+            UserRole::where('user_id', $id)->delete();
+            $userRoleList = [];
+            foreach ($params['roleIds'] as $roleId) {
+                $userRoleList[] = [
+                    'user_id' => $id,
+                    'role_id' => $roleId,
+                    'company_id' => auth()->user()->company_id ?? 0
+                ];
+            }
+            if (!empty($userRoleList)) {
+                UserRole::insert($userRoleList);
+            }
+        });
+        return Code::SUCCESS;
     }
 
-    public function checkUserName($params){
-        $user = $this->query->where('username', $params['username'])->first();
-        if ($user) {
-            return Code::USERNAME_ALREADY_EXISTS;
+    public function checkUserName($params, $type = 'add')
+    {
+        $query = $this->query;
+
+        if ($type === 'add') {
+            // 合并用户名和邮箱的重复检查
+            $exists = $query->where(function ($q) use ($params) {
+                $q->where('username', $params['username'])
+                    ->orWhere('email', $params['email']);
+            })->first();
+
+            if ($exists) {
+                return $exists->username === $params['username']
+                    ? Code::USERNAME_ALREADY_EXISTS
+                    : Code::EMAIL_ALREADY_EXISTS;
+            }
+        } else {
+            // 更新时同时校验邮箱的唯一性
+            $exists = $query->where(function ($q) use ($params) {
+                $q->where('username', $params['username'])
+                    ->orWhere('email', $params['email']);
+            })->where('id', '!=', $params['id'])
+                ->first();
+            if ($exists) {
+                return $exists->username === $params['username']
+                    ? Code::USERNAME_ALREADY_EXISTS
+                    : Code::EMAIL_ALREADY_EXISTS;
+            }
         }
+
         return Code::SUCCESS;
     }
 
@@ -161,7 +186,7 @@ class UserService extends BaseService
 
     public function getFilter(&$query)
     {
-        if(isset($this->formData['createTime'])){
+        if (isset($this->formData['createTime'])) {
             $query->whereBetween('created_at', [
                 Carbon::parse($this->formData['createTime'][0])->startOfDay(),
                 Carbon::parse($this->formData['createTime'][1])->endOfDay()
@@ -170,10 +195,10 @@ class UserService extends BaseService
         if (isset($this->formData['nickname']) && !empty($this->formData['nickname'])) {
             $query->where('nickname', trim($this->formData['nickname']));
         }
-        if (isset($this->formData['status'])){
+        if (isset($this->formData['status'])) {
             $query->where('status', $this->formData['status']);
         }
-        if (isset($this->formData['deptId'])){
+        if (isset($this->formData['deptId'])) {
             $query->where('dept_id', $this->formData['deptId']);
         }
         if (isset($this->formData['keywords'])) {
@@ -201,7 +226,7 @@ class UserService extends BaseService
                     $row->gender == 1 ? '男' : ($row->gender == 2 ? '女' : '未知'),
                     $row->mobile,
                     $row->email,
-                    $row->updated_at!=null? \Carbon\Carbon::parse($row->updated_at)->format('Y/m/d H:i'):null
+                    $row->updated_at != null ? \Carbon\Carbon::parse($row->updated_at)->format('Y/m/d H:i') : null
                 ];
 
             }

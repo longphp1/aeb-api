@@ -129,7 +129,7 @@ class MenuService extends BaseService
     public function deleteMenu($id)
     {
         $ids = _id($id);
-        return $this->model->whereIn($ids)->delete();
+        return $this->query->whereIn('id',$ids)->delete();
     }
 
     /**
@@ -203,62 +203,43 @@ class MenuService extends BaseService
 
     public function getRoutesTree()
     {
+        $menuIds = getUserMenuId();
         $this->query->with(['children'])->where('type', Menu::CATALOG_TYPE)->orderBy('sort', 'asc');
+        if ($menuIds) {
+            $this->query->whereIn('id', $menuIds);
+        }
         $menusList = parent::all();
-        return $this->getRoutesTreeMenu($menusList);
+        return $this->getRoutesTreeMenu($menusList,$menuIds);
     }
 
-    public function getRoutesTreeMenu($menusList)
+    public function getRoutesTreeMenu($menusList,$menuIds)
     {
         $tree = [];
         foreach ($menusList as $menu) {
-            $firstMenu = [
-                'name' => $menu->route_path,
-                'path' => $menu->route_path,
-                'redirect' => $menu->redirect,
-                'component' => $menu->component,
-                'meta' => [
-                    'title' => $menu->name,
-                    'icon' => $menu->icon,
-                    'alwaysShow' => $menu->always_show == 1 ? true : false,
-                    'hidden' => $menu->visible == 1 ? false : true,
-                ],
-                'children' => [],
-            ];
+            if(!in_array($menu->id,$menuIds)){
+                continue;
+            }
+            $firstMenu = $this->buildMenuItem($menu);
+
             foreach ($menu->children as $child) {
-                $secondMenu = [
-                    'name' => $child->name,
-                    'path' => $child->route_path,
-                    'redirect' => $child->redirect,
-                    'component' => $child->component,
-                    'meta' => [
-                        'title' => $child->name,
-                        'path' => $child->route_path,
-                        'icon' => $child->icon,
-                        'alwaysShow' => $child->always_show == 1 ? true : false,
-                        'hidden' => $child->visible == 1 ? false : true,
-                        'params' => $child->params
-                    ],
-                    'children' => [],
-                ];
-                $childList = Menu::query()->where('parent_id', $child->id)->where('type', Menu::MENU_TYPE)->get();
-                foreach ($childList as $tmp) {
-                    $thirdMenu = [
-                        'name' => $tmp->name,
-                        'path' => $tmp->route_path,
-                        'redirect' => $tmp->redirect,
-                        'component' => $tmp->component,
-                        'meta' => [
-                            'title' => $tmp->name,
-                            'path' => $child->route_path,
-                            'icon' => $tmp->icon,
-                            'alwaysShow' => $tmp->always_show == 1 ? true : false,
-                            'hidden' => $tmp->visible == 1 ? false : true,
-                        ],
-                        'children' => [],
-                    ];
+                if(!in_array($child->id,$menuIds)){
+                    continue;
+                }
+                $secondMenu = $this->buildMenuItem($child);
+
+                // 预加载第三级菜单避免 N+1 查询
+                $child->load(['children' => function($query) {
+                    $query->where('type', Menu::MENU_TYPE);
+                }]);
+
+                foreach ($child->children as $tmp) {
+                    if(!in_array($tmp->id,$menuIds)){
+                        continue;
+                    }
+                    $thirdMenu = $this->buildMenuItem($tmp);
                     $secondMenu['children'][] = $thirdMenu;
                 }
+
                 $firstMenu['children'][] = $secondMenu;
             }
             $tree[] = $firstMenu;
@@ -266,6 +247,29 @@ class MenuService extends BaseService
         return $tree;
     }
 
+    /**
+     * 构建统一菜单项结构
+     */
+    private function buildMenuItem(Menu $menu): array
+    {
+        return [
+            'name' => $menu->name,
+            'name_en' => $menu->name_en,
+            'path' => $menu->route_path,
+            'redirect' => $menu->redirect,
+            'component' => $menu->component,
+            'meta' => [
+                'title' => $menu->name,
+                'title_en' => $menu->name_en,
+                'path' => $menu->route_path, // 修复原第三级菜单 path 错误
+                'icon' => $menu->icon,
+                'alwaysShow' => (bool)$menu->always_show,
+                'hidden' => !(bool)$menu->visible,
+                'params' => $menu->params ?? null
+            ],
+            'children' => [],
+        ];
+    }
     public function rules()
     {
         return [

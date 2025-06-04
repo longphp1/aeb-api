@@ -6,6 +6,8 @@ namespace App\Models;
 use App\Models\System\Dept;
 use App\Models\System\Menu;
 use App\Models\System\Role;
+use App\Models\System\RoleMenu;
+use App\Models\System\UserRole;
 use App\Models\Traits\Basis;
 use App\Models\Traits\HasValidateUnique;
 use App\Models\Traits\LikeScope;
@@ -98,7 +100,8 @@ class User extends Authenticatable implements JWTSubject
 
     public function permRelation()
     {
-        return $this->belongsToMany(Menu::class, 'sys_role_menu', 'role_id', 'menu_id');
+        $roleIds = $this->userRole()->pluck('role_id');
+        return $this->belongsToMany(Menu::class, 'sys_role_menu', 'role_id', 'menu_id')->wherePivotIn('role_id', $roleIds)->withoutGlobalScopes();
     }
 
     public function getRolesAttribute()
@@ -114,7 +117,7 @@ class User extends Authenticatable implements JWTSubject
     //查询当前用户按钮权限
     public function getPermsAttribute()
     {
-        return $this->permRelation()->where('type', Menu::BUTTON_TYPE)->pluck('perm')->toArray();
+        return Menu::query()->join('sys_role_menu','sys_role_menu.menu_id','=','sys_menu.id')->join('sys_user_role','sys_user_role.role_id','=','sys_role_menu.role_id')->where('sys_user_role.user_id','=',$this->id)->where('type', Menu::BUTTON_TYPE)->pluck('perm')->toArray();
     }
 
     public function dept()
@@ -132,6 +135,12 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(User::class, 'id', 'updated_by');
     }
 
+    public function userRole()
+    {
+        return $this->hasMany(UserRole::class, 'user_id', 'id');
+    }
+
+
     public static function init($params, $type = 'add')
     {
         $data = [
@@ -139,10 +148,10 @@ class User extends Authenticatable implements JWTSubject
             'nickname' => $params['nickname'],
             'gender' => $params['gender'],
             'dept_id' => $params['deptId'],
-            'avatar' => $params['avatar']??'',
+            'avatar' => $params['avatar'] ?? '',
             'mobile' => $params['mobile'],
             'email' => $params['email'],
-            'status' => $params['status']??1,
+            'status' => $params['status'] ?? 1,
             'forbid_login' => $params['forbid_login'] ?? 0
         ];
         if ($type == 'add') {

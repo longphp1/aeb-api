@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\AccidentException;
+use App\Models\System\Menu;
 use Carbon\Carbon;
 
 if (!function_exists('formatRet')) {
@@ -205,9 +206,6 @@ if (!function_exists('getIp')) {
     }
 }
 if (!function_exists('_id')) {
-    /**
-     * 获取请求来源ip
-     */
     function _id($id)
     {
         if (is_string($id) && strpos($id, ',') !== false) {
@@ -217,5 +215,15 @@ if (!function_exists('_id')) {
         } else {
             return [$id];
         }
+    }
+}
+if (!function_exists('getUserMenuId')) {
+    function getUserMenuId()
+    {
+        $userId=auth()->user()->id??0;
+        if ($userId>0) {
+            return \App\Models\System\RoleMenu::query()->join('sys_user_role','sys_user_role.role_id','=','sys_role_menu.role_id')->where('sys_user_role.user_id','=',$userId)->pluck('menu_id')->toArray();
+        }
+        return [];
     }
 }

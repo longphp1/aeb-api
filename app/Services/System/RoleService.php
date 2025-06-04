@@ -74,7 +74,7 @@ class RoleService extends BaseService
             'status' => 'sometimes|nullable|integer|in:0,1,2',
             'dataScope' => 'sometimes|nullable|integer',
         ])->validate();
-        $code = $this->checkRoleName($params);
+        $code = $this->checkRoleName($params,'update');
         if ($code != Code::SUCCESS) {
             return $code;
         }
@@ -87,16 +87,37 @@ class RoleService extends BaseService
         return Code::USER_NOT_EXIST;
     }
 
-    public function checkRoleName($params)
+    public function checkRoleName($params, $type = 'add')
     {
-        $role = Role::query()->where('name', $params['name'])->first();
-        if ($role) {
-            return Code::USER_ROLE_NAME_ALREADY_EXISTS;
+        $query = Role::query();
+
+        if ($type === 'add') {
+            // 合并 name 和 code 的重复检查
+            $exists = $query->where(function ($q) use ($params) {
+                $q->where('name', $params['name'])
+                    ->orWhere('code', $params['code']);
+            })->first();
+
+            if ($exists) {
+                return $exists->name === $params['name']
+                    ? Code::USER_ROLE_NAME_ALREADY_EXISTS
+                    : Code::USER_ROLE_CODE_ALREADY_EXISTS;
+            }
+        } else {
+            // 更新时同时校验 code 的唯一性
+            $exists = $query->where(function ($q) use ($params) {
+                $q->where('name', $params['name'])
+                    ->orWhere('code', $params['code']);
+            })->where('id', '!=', $params['id'])
+                ->first();
+
+            if ($exists) {
+                return $exists->name === $params['name']
+                    ? Code::USER_ROLE_NAME_ALREADY_EXISTS
+                    : Code::USER_ROLE_CODE_ALREADY_EXISTS;
+            }
         }
-        $role = Role::query()->where('code', $params['code'])->first();
-        if ($role) {
-            return Code::USER_ROLE_CODE_ALREADY_EXISTS;
-        }
+
         return Code::SUCCESS;
     }
 

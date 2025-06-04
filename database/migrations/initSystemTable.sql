@@ -118,6 +118,7 @@ CREATE TABLE `sys_menu`  (
                              `parent_id` bigint NOT NULL COMMENT '父菜单ID',
                              `tree_path` varchar(255) COMMENT '父节点ID路径',
                              `name` varchar(128) NOT NULL COMMENT '菜单名称',
+                             `name_en` varchar(128) NOT NULL COMMENT '菜单名称EN',
                              `type` tinyint NOT NULL COMMENT '菜单类型（1-菜单 2-目录 3-外链 4-按钮）',
                              `route_name` varchar(255) COMMENT '路由名称（Vue Router 中用于命名路由）',
                              `route_path` varchar(128) COMMENT '路由路径（Vue Router 中定义的 URL 路径）',

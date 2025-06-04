@@ -87,7 +87,7 @@ class ConfigService extends BaseService
     public function destroy($id)
     {
         $ids = _id($id);
-        return $this->model->whereIn($ids)->delete();
+        return $this->model->whereIn('id',$ids)->delete();
     }
 
     public function getFilter(&$query)

@@ -36,6 +36,8 @@ class Code
     const PHONE_FORMAT_VERIFICATION_FAILED = ["code" => "A0151", "msg" => "手机格式校验失败"];
     const ADDRESS_FORMAT_VERIFICATION_FAILED = ["code" => "A0152", "msg" => "地址格式校验失败"];
     const EMAIL_FORMAT_VERIFICATION_FAILED = ["code" => "A0153", "msg" => "邮箱格式校验失败"];
+    const EMAIL_ALREADY_EXISTS = ["code" => "A0154", "msg" => "邮箱已存在"];
+
     /** 二级宏观错误码  */
     const USER_LOGIN_EXCEPTION = ["code" => "A0200", "msg" => "用户登录异常"];
     const USER_ACCOUNT_FROZEN = ["code" => "A0201", "msg" => "用户账户被冻结"];

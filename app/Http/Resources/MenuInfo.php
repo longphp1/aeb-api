@@ -16,6 +16,7 @@ class MenuInfo extends JsonResource
             'id' => $this->id,
             'parentId' => $this->parent_id,
             'name' => $this->name,
+            'name_en' => $this->name_en,
             'type' => $this->type,
             'routeName' => $this->route_name,
             'routePath' => $this->route_path,
