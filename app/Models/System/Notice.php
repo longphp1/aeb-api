@@ -44,7 +44,7 @@ class Notice extends Model
             'type' => $params['type'],
             'level' => $params['level'],
             'target_type' => $params['targetType'],
-
+            'target_user_ids' => implode(',', $params['targetUserIds']),
             'publisher_id' => auth()->user()->id,
             'publish_status' => self::UNPUBLISHED,
             'create_by' => auth()->user()->id,

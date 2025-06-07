@@ -14,16 +14,30 @@ class MyNoticeList extends ResourceCollection
         return [
             'data' => [
                 'list' => $this->collection->map(function ($data) {
+                    // 使用空对象模式避免重复的空值检查
+                    $notice = $data->notice ?? (object)[
+                        'level' => '',
+                        'publish_time' => null,
+                        'publisher' => (object)['username' => ''],
+                        'title' => '',
+                        'type' => ''
+                    ];
+
+                    // 统一处理时间格式化
+                    $formatTime = function ($timestamp) {
+                        return $timestamp ? Carbon::parse($timestamp)->format('Y/m/d H:i') : null;
+                    };
+
                     return [
                         'id' => $data->id,
                         'isRead' => $data->is_read,
-                        'level' => $data->notice->level ?? "",
-                        'publishTime' => $data->notice->publish_time != null ? Carbon::parse($data->notice->publish_time)->format('Y/m/d H:i') : null,
-                        'publisherName' => $data->notice->publisher->username ?? '',
-                        'title' => $data->notice->title ?? '',
-                        'type' => $data->notice->type ?? '',
-                        'createTime' => $data->created_at != null ? Carbon::parse($data->created_at)->format('Y/m/d H:i') : null,
-                        'updateTime' => $data->updated_at != null ? Carbon::parse($data->updated_at)->format('Y/m/d H:i') : null,
+                        'level' => $notice->level,
+                        'publishTime' => $formatTime($notice->publish_time),
+                        'publisherName' => $notice->publisher->username,
+                        'title' => $notice->title,
+                        'type' => $notice->type,
+                        'createTime' => $formatTime($data->created_at),
+                        'updateTime' => $formatTime($data->updated_at),
                         'company_id' => $data->company_id
                     ];
                 }),

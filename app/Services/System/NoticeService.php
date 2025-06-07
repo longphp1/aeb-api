@@ -99,7 +99,7 @@ class NoticeService extends BaseService
         if ($params['targetType'] == Notice::TARGET_TYPE_ALL) {
             $userIdArr = SysUser::where('company_id', auth()->user()->company_id)->pluck('id')->toArray();
         } else {
-            $userIdArr = $params['targetUserIds'];
+            $userIdArr = $params['targetUserIds']??[];
         }
         foreach ($userIdArr as $userId) {
             $userNoticeList[] = [

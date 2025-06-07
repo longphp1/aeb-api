@@ -20,6 +20,7 @@ class NoticeInfo extends JsonResource
             'level' => $this->level,
             'targetType' => $this->target_type,
             'target_user_ids' => $this->target_user_ids,
+            'targetUserIds' => array_map('intval', array_filter(explode(',', $this->target_user_ids), 'is_numeric')),
             'publisherId' => $this->publisher_id,
             'publishStatus' => $this->publish_status,
             'publishTime' => $this->publish_time != null ? Carbon::parse($this->publish_time)->format('Y/m/d H:i') : null,
