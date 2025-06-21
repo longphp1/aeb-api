@@ -120,7 +120,7 @@ class NoticeService extends BaseService
 
     public function show($id)
     {
-        return $this->query->find($id);
+        return $this->query->findOrFail($id);
     }
 
 

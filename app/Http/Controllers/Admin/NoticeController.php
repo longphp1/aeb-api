@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\NoticeInfo;
-use App\Http\Resources\NoticeList;
 use App\Lib\Code;
 use App\Services\ApiResponseService;
 use App\Services\System\NoticeService;
@@ -23,7 +22,7 @@ class NoticeController extends Controller
 
     public function index()
     {
-        return NoticeList::make($this->noticeService->index())->additional(Code::SUCCESS);
+        return NoticeInfo::collection($this->noticeService->index())->additional(Code::SUCCESS);
     }
 
     public function show($id)

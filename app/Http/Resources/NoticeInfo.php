@@ -22,6 +22,7 @@ class NoticeInfo extends JsonResource
             'target_user_ids' => $this->target_user_ids,
             'targetUserIds' => array_map('intval', array_filter(explode(',', $this->target_user_ids), 'is_numeric')),
             'publisherId' => $this->publisher_id,
+            'publisherName' => $this->publisher->username,
             'publishStatus' => $this->publish_status,
             'publishTime' => $this->publish_time != null ? Carbon::parse($this->publish_time)->format('Y/m/d H:i') : null,
             'revokeTime' => $this->revoke_time != null ? Carbon::parse($this->revoke_time)->format('Y/m/d H:i') : null,

@@ -37,7 +37,7 @@ class Menu extends Model
             'route_name' => $params['routeName'] ?? '',
             'route_path' => $params['routePath'] ?? '',
             'component' => $params['component'] ?? '',
-            'perm' => $params['perm']??'',
+            'perm' => $params['perm'] ?? '',
             'always_show' => $params['alwaysShow'] ?? 0,
             'keep_alive' => $params['keepAlive'] ?? 0,
             'visible' => $params['visible'] ?? 1,
@@ -46,8 +46,11 @@ class Menu extends Model
             'redirect' => $params['redirect'] ?? '',
             'params' => isset($params['params']) ? json_encode($params['params']) : '',
             'created_at' => Carbon::now()->toDateTimeString(),
-            'company_id' => auth()->user()->company_id ??0,
+            'company_id' => auth()->user()->company_id ?? 0,
         ];
+        if ($data['type'] == self::CATALOG_TYPE) {
+            $data['component'] = empty($data['component']) ? 'Layout' : $data['component'];
+        }
         if ($type == 'update') {
             $data['updated_at'] = Carbon::now()->toDateTimeString();
         }

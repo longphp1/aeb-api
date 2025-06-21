@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([
     'middleware' => 'api',
-    'prefix' => 'v1/auth'
+    'prefix' => 'admin/auth'
 ], function ($router) {
     Route::post('/register', [AuthController::class, 'register'])->name('register');
     Route::get('/captcha', [AuthController::class, 'getCaptcha'])->name('captcha');
@@ -15,7 +15,7 @@ Route::group([
     Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api')->name('refresh');
 });
 
-Route::prefix('v1')->middleware(['auth:api', \App\Http\Middleware\LogApiRequests::class])->namespace('App\Http\Controllers\Admin')->group(function () {
+Route::prefix('admin')->middleware(['auth:api', \App\Http\Middleware\LogApiRequests::class])->namespace('App\Http\Controllers\Admin')->group(function () {
     /*
     |--------------------------------------------------------------------------
     | 员工 Routes
@@ -128,5 +128,60 @@ Route::prefix('v1')->middleware(['auth:api', \App\Http\Middleware\LogApiRequests
     Route::prefix('logs')->name('logs')->group(function () {
         Route::get('/page', 'SysLogController@index')->name('index');
     });
+
+    Route::prefix('country')->name('country')->group(function () {
+        Route::get('/', 'CountryCodeController@index')->name('index');
+        Route::get('/{id}/form', 'CountryCodeController@show')->name('form')->where('id', '[0-9]+');
+        Route::get('/{id}', 'CountryCodeController@show')->name('detail')->where('id', '[0-9]+');
+        Route::post('/', 'CountryCodeController@store')->name('store');
+        Route::put('/{id}', 'CountryCodeController@update')->name('update')->where('id', '[0-9]+');
+        Route::delete('/{id}', 'CountryCodeController@destroy')->name('delete');
+        Route::post('/{id}/changeStatus', 'CountryCodeController@changeStatus')->name('changeStatus');
+        Route::get('/countryAll', 'CountryCodeController@countryAll')->name('countryAll');
+
+    });
 });
 
+Route::prefix('import')->middleware(['auth:api', \App\Http\Middleware\LogApiRequests::class])->namespace('App\Http\Controllers\Aeb')->group(function () {
+    Route::prefix('declarations')->name('declarations')->group(function () {
+        Route::get('/', 'ImportDeclarationsController@index')->name('index');
+        Route::get('/{id}', 'ImportDeclarationsController@show')->name('show')->where('id', '[0-9]+');
+        Route::post('/', 'ImportDeclarationsController@store')->name('store');
+        Route::put('/{id}', 'ImportDeclarationsController@update')->name('update')->where('id', '[0-9]+');
+        Route::delete('/{id}', 'ImportDeclarationsController@destroy')->name('delete');
+        Route::get('/importDeclarationsEnum', 'ImportDeclarationsController@importDeclarationsEnum')->name('importDeclarationsEnum');
+    });
+    Route::prefix('company')->name('company')->group(function () {
+        Route::get('/', 'ImportConfigCompanyController@index')->name('index');
+        Route::get('/{id}', 'ImportConfigCompanyController@show')->name('show')->where('id', '[0-9]+');
+        Route::post('/', 'ImportConfigCompanyController@store')->name('store');
+        Route::put('/{id}', 'ImportConfigCompanyController@update')->name('update')->where('id', '[0-9]+');
+        Route::delete('/{id}', 'ImportConfigCompanyController@destroy')->name('delete');
+        Route::get('/companyAll', 'ImportConfigCompanyController@companyAll')->name('companyAll');
+    });
+    Route::prefix('contact')->name('contact')->group(function () {
+        Route::get('/', 'ImportConfigContactController@index')->name('index');
+        Route::get('/{id}', 'ImportConfigContactController@show')->name('show')->where('id', '[0-9]+');
+        Route::post('/', 'ImportConfigContactController@store')->name('store');
+        Route::put('/{id}', 'ImportConfigContactController@update')->name('update')->where('id', '[0-9]+');
+        Route::delete('/{id}', 'ImportConfigContactController@destroy')->name('delete');
+        Route::get('/contactAll', 'ImportConfigContactController@contactAll')->name('contactAll');
+    });
+    Route::prefix('address')->name('address')->group(function () {
+        Route::get('/', 'ImportConfigAddressController@index')->name('index');
+        Route::get('/{id}', 'ImportConfigAddressController@show')->name('show')->where('id', '[0-9]+');
+        Route::post('/', 'ImportConfigAddressController@store')->name('store');
+        Route::put('/{id}', 'ImportConfigAddressController@update')->name('update')->where('id', '[0-9]+');
+        Route::delete('/{id}', 'ImportConfigAddressController@destroy')->name('delete');
+        Route::get('/addressAll', 'ImportConfigAddressController@addressAll')->name('addressAll');
+    });
+
+    Route::prefix('customs-office')->name('customs-office')->group(function () {
+        Route::get('/', 'ImportCustomsOfficeController@index')->name('index');
+        Route::get('/{id}', 'ImportCustomsOfficeController@show')->name('show')->where('id', '[0-9]+');
+        Route::post('/', 'ImportCustomsOfficeController@store')->name('store');
+        Route::put('/{id}', 'ImportCustomsOfficeController@update')->name('update')->where('id', '[0-9]+');
+        Route::delete('/{id}', 'ImportCustomsOfficeController@destroy')->name('delete');
+        Route::get('/customsOfficeAll', 'ImportCustomsOfficeController@customsOfficeAll')->name('customsOfficeAll');
+    });
+});

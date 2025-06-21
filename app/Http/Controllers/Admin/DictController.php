@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DictInfo;
-use App\Http\Resources\DictItemInfo;
-use App\Http\Resources\DictList;
 use App\Lib\Code;
 use App\Services\ApiResponseService;
 use App\Services\System\DictService;
@@ -22,7 +20,7 @@ class DictController extends Controller
 
     public function index()
     {
-        return DictList::make($this->dictService->index())->additional(Code::SUCCESS);
+        return DictInfo::collection($this->dictService->index())->additional(Code::SUCCESS);
     }
 
     public function show($id, Request $request)

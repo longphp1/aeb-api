@@ -37,6 +37,8 @@ class Code
     const ADDRESS_FORMAT_VERIFICATION_FAILED = ["code" => "A0152", "msg" => "地址格式校验失败"];
     const EMAIL_FORMAT_VERIFICATION_FAILED = ["code" => "A0153", "msg" => "邮箱格式校验失败"];
     const EMAIL_ALREADY_EXISTS = ["code" => "A0154", "msg" => "邮箱已存在"];
+    const COUNTRY_CODE_ALREADY_EXISTS = ["code" => "A0155", "msg" => "国家代码已存在"];
+    const COUNTRY_NAME_ALREADY_EXISTS = ["code" => "A0156", "msg" => "国家名称已存在"];
 
     /** 二级宏观错误码  */
     const USER_LOGIN_EXCEPTION = ["code" => "A0200", "msg" => "用户登录异常"];

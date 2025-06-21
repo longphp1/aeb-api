@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RoleInfo;
-use App\Http\Resources\RoleList;
 use App\Lib\Code;
 use App\Services\ApiResponseService;
 use App\Services\System\RoleService;
@@ -22,7 +21,7 @@ class RoleController extends Controller
 
     public function index()
     {
-        return RoleList::make($this->roleService->index())->additional(Code::SUCCESS);
+        return RoleInfo::collection($this->roleService->index())->additional(Code::SUCCESS);
     }
 
     public function show($id)

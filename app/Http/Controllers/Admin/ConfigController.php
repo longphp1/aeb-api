@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ConfigInfo;
-use App\Http\Resources\ConfigList;
 use App\Lib\Code;
 use App\Services\ApiResponseService;
 use App\Services\System\ConfigService;
@@ -21,7 +20,7 @@ class ConfigController extends Controller
 
     public function index(Request $request)
     {
-        return ConfigList::make($this->configService->index())->additional(Code::SUCCESS);
+        return ConfigInfo::collection($this->configService->index())->additional(Code::SUCCESS);
     }
 
     public function store(Request $request)

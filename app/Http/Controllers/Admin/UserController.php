@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserInfo;
-use App\Http\Resources\UserList;
 use App\Lib\Code;
 use App\Services\Admin\UserService;
 use App\Services\ApiResponseService;
@@ -25,7 +24,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return UserList::make($this->userService->index())->additional(Code::SUCCESS);
+        return UserInfo::collection($this->userService->index())->additional(Code::SUCCESS);
     }
 
     /**

@@ -38,7 +38,7 @@ class CompanyScope implements Scope
         //如果是未认证状态
         if (auth()->guest()) {
 
-            $id = 2;
+            $id = 0;
             // if (!($id = static::getUuidFromHeader())) {
 
             //     $id = static::getUuidFromInput();

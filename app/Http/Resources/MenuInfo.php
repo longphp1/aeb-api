@@ -28,7 +28,7 @@ class MenuInfo extends JsonResource
             'sort' => $this->sort,
             'icon' => $this->icon,
             'redirect' => $this->redirect,
-            'params' => $this->params,
+            'params' => empty($this->params) ? [] : json_decode($this->params, true),
             'created_at' => $this->created_at?->format('Y/m/d H:i'),
             'updated_at' => $this->updated_at?->format('Y/m/d H:i'),
             'company_id' => $this->company_id,

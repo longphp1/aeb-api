@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DictItemInfo;
-use App\Http\Resources\DictItemList;
-use App\Http\Resources\DictList;
 use App\Lib\Code;
 use App\Services\ApiResponseService;
 use App\Services\System\DictItemService;
@@ -23,7 +21,7 @@ class DictItemController extends Controller
 
     public function index($dictCode, Request $request)
     {
-        return DictItemList::make($this->service->list($dictCode))->additional(Code::SUCCESS);
+        return DictItemInfo::collection($this->service->list($dictCode))->additional(Code::SUCCESS);
     }
 
     public function show($dictCode, Request $request)

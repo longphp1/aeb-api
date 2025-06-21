@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Resources\MyNoticeList;
+use App\Http\Resources\MyNoticeInfo;
 use App\Lib\Code;
 use App\Services\ApiResponseService;
 use App\Services\System\UserNoticeService;
@@ -20,7 +20,7 @@ class UserNoticeController
 
     public function myNotice(Request $request)
     {
-        return MyNoticeList::make($this->userNoticeService->getUnReadNotice())->additional(Code::SUCCESS);
+        return MyNoticeInfo::collection($this->userNoticeService->getUnReadNotice())->additional(Code::SUCCESS);
     }
 
     public function readAll(Request $request)
